@@ -2,6 +2,22 @@ import numpy as np
 import cv2
 from preprocess import cut_image
 
+AVG_H = 1381
+AVG_W = 2272
+
+def get_mask(source):
+    """
+    Convert to gray, apply median blur and binary threshold
+    Args:
+        source: np.array
+    Returns:
+        tresholded: np.array
+    """
+    img = cv2.cvtColor(source, cv2.COLOR_RGB2GRAY)
+    blured = cv2.medianBlur(img, 5)
+    tresholded = np.invert(cv2.threshold(
+                           blured, 127, 255, cv2.THRESH_BINARY)[1])
+    return tresholded
 
 def count_circles(source, avg_circle_radius):
     """
@@ -12,28 +28,23 @@ def count_circles(source, avg_circle_radius):
     Returns:
         circle_count: int
     """
-    img = cv2.cvtColor(source, cv2.COLOR_RGB2GRAY)
-    blured = cv2.medianBlur(img, 5)
-    tresholded = np.invert(cv2.threshold(
-                           blured, 127, 255, cv2.THRESH_BINARY)[1])
+    tresholded = get_mask(source)
     approx_area = np.pi * avg_circle_radius ** 2
     circle_count = round(np.sum(tresholded / 255) / approx_area)
     return circle_count
 
 
-def draw_hough(draw_source, ret_circles=False, draw_circles=False):
+def draw_hough(draw_source):
     """
     Looks for circles in image, draws them and returns average radius and
     If ret_circles == True, returns list of centers and radiuses of each circle
     Args:
         draw_source: np.array
-        ret_circles: boolean
-        draw_circles: boolean
+    Returns:
+        avg_r: float - mean radius of found circles
+        circles: list
     """
-    img = cv2.cvtColor(draw_source, cv2.COLOR_RGB2GRAY)
-    blured = cv2.medianBlur(img, 5)
-    tresholded = np.invert(cv2.threshold(
-                           blured, 127, 255, cv2.THRESH_BINARY)[1])
+    tresholded = get_mask(draw_source)
 
     circles = cv2.HoughCircles(
         tresholded,
@@ -46,24 +57,12 @@ def draw_hough(draw_source, ret_circles=False, draw_circles=False):
         maxRadius=17,
     )
     circles = np.uint16(np.around(circles))
-    circled = draw_source.copy()
-    avg_r = 0
-    for i in circles[0, :]:
-        avg_r += i[2]
-        if draw_circles:
-            cv2.circle(circled, (i[0], i[1]), i[2], (255, 0, 0), 2)
-            cv2.circle(circled, (i[0], i[1]), 2, (255, 0, 0), 1)
+    avg_r = np.array(circles[0][:,2]).mean()
 
-    if not ret_circles:
-        return circled, avg_r / len(circles[0])
-    return circled, avg_r / len(circles[0]), circles[0]
+    return avg_r, circles[0]
 
 
-AVG_H = 1381
-AVG_W = 2272
-
-
-def get_granule_count(processed_img, ret_dist=False):
+def get_granule_count(processed_img):
     """
     Returns approximate count of circles in image,
     if ret_dist == True, return distribution of circles' radiuses
@@ -75,16 +74,14 @@ def get_granule_count(processed_img, ret_dist=False):
         50,
         50,
     )
-    im_circled, avg_r, circles = draw_hough(proc, ret_circles=True)
+    avg_r = draw_hough(proc, ret_circles=False)
     found = count_circles(proc, avg_r)
 
     resized = cv2.resize(proc, (AVG_W, AVG_H))
-    _, _, circles = draw_hough(resized, ret_circles=True)
+    _, circles = draw_hough(resized, ret_circles=True)
     radiuses = np.array([circle[2] for circle in circles])
 
     distros = np.array(
         [np.where(radiuses == i)[0].shape[0] for i in range(1, 30)])
 
-    if ret_dist:
-        return found, distros / np.sum(distros)
-    return found
+    return found, distros / np.sum(distros)

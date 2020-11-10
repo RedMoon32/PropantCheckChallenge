@@ -31,22 +31,19 @@ def apply_threshold(filtered):
 
 def cut_image(
     img,
-    x_bound_left,
-    x_bound_right,
-    y_bound_up,
-    y_bound_down,
+    padding
 ):
     """
     Center crop of image with given boundaries
     Args:
         img: np.array
-        x_bound_left, x_bound_right, y_bound_up, y_bound_down: int
+        padding: int
     Returns:
         img: np.array
     """
     return img[
-        y_bound_up: img.shape[0] - y_bound_down,
-        x_bound_left: img.shape[1] - x_bound_right,
+        padding: img.shape[0] - padding,
+        padding: img.shape[1] - padding,
     ]
 
 
@@ -54,9 +51,9 @@ def cut_borders(img):
     """
     Automaticly crop black rectangle in the photo
     Args:
-        img: np.array
+        img: np.array - initial image
     Returns:
-        img: np.array
+        img: np.array - cropped image
     """
     x_left = 0
     x_right = img.shape[0] - 1
@@ -64,13 +61,13 @@ def cut_borders(img):
     y_right = img.shape[1] - 1
 
     gray = apply_filter(img)
-    thresh = apply_threshold(gray)
+    thresh = apply_threshold(gray)/255
 
-    while thresh[x_left][y_left] == 255:
+    while thresh[x_left][y_left] == 1:
         x_left += 1
         y_left += 1
 
-    while thresh[x_right][y_right] == 255:
+    while thresh[x_right][y_right] == 1:
         x_right -= 1
         y_right -= 1
 
@@ -93,8 +90,8 @@ def detect_contour(img, image_shape):
         img: np.array()
         image_shape: tuple
     Returns:
-        canvas: np.array()
-        cnt: list
+        canvas: np.array() - empty image with contours drawn
+        cnt: list - list of contours
     """
     canvas = np.zeros(image_shape, np.uint8)
     contours, hierarchy = cv2.findContours(img, cv2.RETR_TREE,
@@ -125,12 +122,12 @@ def detect_corners_from_contour(canvas, cnt):
 
 def order_points(pts):
     """
-    Rearrange the contour points so that first entry is top-left,
+    Rearrange the corner points so that first entry is top-left,
     second is top-right, third is bottom-right, fourth is bottom-left.
     Args:
-        pts: list
+        pts: list - corner points 
     Returns:
-        rect: list
+        rect: list - rearranged points
     """
     rect = np.zeros((4, 2), dtype="float32")
     # the top-left point will have the smallest sum, whereas
@@ -152,10 +149,10 @@ def four_point_transform(image, pts):
     """
     Apply perspective transform to image
     Args:
-        image: np.array
-        pts: list
+        image: np.array - initial image
+        pts: list - corner points of rectangle
     Returns:
-        warped: np.array
+        warped: np.array - perspective transformed image
     """
     # obtain a consistent order of the points and unpack them
     # individually
@@ -200,9 +197,9 @@ def automatic_brightness_and_contrast(image, clip_hist_percent=1):
         image: np.array
         clip_hist_percent: float
     Returns:
-        auto_result: np.array
-        alpha: float
-        beta: float
+        auto_result: np.array - balanced image
+        alpha: float - alpha used in cv2.convertScaleAbs
+        beta: float - beta used in cv2.convertScaleAbs
     """
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
@@ -243,9 +240,9 @@ def full_pipeline(img):
     """
     Full preprocssing of the image
     Args:
-        img: np.array
+        img: np.array - Initial Image
     Returns:
-        img: np.array
+        img: np.array - cropped by rectangle image
     """
     # rawly cut image so it does find contour of the paper itself
     cutted_img = cut_image(img, 500, 500, 500, 500)
