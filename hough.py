@@ -65,7 +65,7 @@ def draw_hough(draw_source):
 def get_granule_count(processed_img):
     """
     Returns approximate count of circles in image,
-    if ret_dist == True, return distribution of circles' radiuses
+    and distribution of circles' radiuses
     """
     proc = cut_image(
         processed_img,
