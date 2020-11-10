@@ -245,7 +245,7 @@ def full_pipeline(img):
         img: np.array - cropped by rectangle image
     """
     # rawly cut image so it does find contour of the paper itself
-    cutted_img = cut_image(img, 500, 500, 500, 500)
+    cutted_img = cut_image(img, 500)
     filtered = apply_filter(cutted_img)
     thresholded = apply_threshold(filtered)
     canvas, contour = detect_contour(thresholded, thresholded.shape)

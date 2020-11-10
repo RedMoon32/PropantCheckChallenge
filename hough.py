@@ -36,8 +36,8 @@ def count_circles(source, avg_circle_radius):
 
 def draw_hough(draw_source):
     """
-    Looks for circles in image, draws them and returns average radius and
-    If ret_circles == True, returns list of centers and radiuses of each circle
+    Looks for circles in image, draws them and returns average radius
+    and list of centers and radiuses of each circle
     Args:
         draw_source: np.array
     Returns:
@@ -71,11 +71,10 @@ def get_granule_count(processed_img):
         processed_img,
         50
     )
-    avg_r = draw_hough(proc, ret_circles=False)
-    found = count_circles(proc, avg_r)
-
+    
     resized = cv2.resize(proc, (AVG_W, AVG_H))
-    _, circles = draw_hough(resized, ret_circles=True)
+    avg_r, circles = draw_hough(resized, ret_circles=True)
+    found = count_circles(proc, avg_r)
     radiuses = np.array([circle[2] for circle in circles])
 
     distros = np.array(

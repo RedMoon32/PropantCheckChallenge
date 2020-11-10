@@ -1,6 +1,7 @@
 import preprocess
 import cv2
 import os
+import tqdm
 
 TRAIN = "./data/train"
 PREPROCESSED_PATH = "preprocessed_imgs"
@@ -14,13 +15,10 @@ def run():
     except:
         pass
 
-    for ind in range(1, 791):
+    for ind in tqdm.tqdm(range(1, 791)):
         im = read_im(ind)
-        try:
-            cv2.imwrite(os.path.join(PREPROCESSED_PATH, f"{ind}.jpg"), preprocess.full_pipeline(im))
-            print(f"Image #{ind} processed")
-        except Exception as e:
-            print(e)
+        cv2.imwrite(os.path.join(PREPROCESSED_PATH, f"{ind}.jpg"), preprocess.full_pipeline(im))
+            
 
 
 if __name__ == '__main__':
