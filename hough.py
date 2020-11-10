@@ -69,7 +69,7 @@ def get_granule_count(processed_img):
     """
     proc = cut_image(
         processed_img,
-        50
+        30
     )
     
     resized = cv2.resize(proc, (AVG_W, AVG_H))
