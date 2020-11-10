@@ -69,10 +69,7 @@ def get_granule_count(processed_img):
     """
     proc = cut_image(
         processed_img,
-        50,
-        50,
-        50,
-        50,
+        50
     )
     avg_r = draw_hough(proc, ret_circles=False)
     found = count_circles(proc, avg_r)
