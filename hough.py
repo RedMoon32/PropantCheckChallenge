@@ -29,7 +29,7 @@ def count_circles(source, avg_circle_radius):
         circle_count: int
     """
     tresholded = get_mask(source)
-    approx_area = np.pi * avg_circle_radius ** 2
+    approx_area = np.pi * (avg_circle_radius ** 2)
     circle_count = round(np.sum(tresholded / 255) / approx_area)
     return circle_count
 
