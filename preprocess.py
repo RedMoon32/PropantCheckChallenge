@@ -60,14 +60,14 @@ def cut_borders(img):
     y_left = 0
     y_right = img.shape[1] - 1
 
-    gray = apply_filter(img)
-    thresh = apply_threshold(gray)/255
+    gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
+    thresh = apply_threshold(gray)
 
-    while thresh[x_left][y_left] == 1:
+    while thresh[x_left][y_left] == 255:
         x_left += 1
         y_left += 1
 
-    while thresh[x_right][y_right] == 1:
+    while thresh[x_right][y_right] == 255:
         x_right -= 1
         y_right -= 1
 
