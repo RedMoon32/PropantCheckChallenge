@@ -3,7 +3,6 @@ import numpy as np
 import cv2
 import os
 import random
-from tqdm import tqdm_notebook as tqdm
 from sklearn.multioutput import MultiOutputRegressor
 from sklearn.ensemble import RandomForestRegressor
 
@@ -17,7 +16,7 @@ PIXEL_TO_MM_RATIO = 0.1
 data_df = None
 
 
-def read_im(im_id):
+def read_im(im_id: int) -> np.array:
     """
     Read image by id
 
@@ -29,7 +28,7 @@ def read_im(im_id):
     return cv2.imread(os.path.join(TRAIN, str(im_id) + ".jpg"))
 
 
-def get_train_radiuses(cur_im):
+def get_train_radiuses(cur_im: int) -> np.array:
     """
     Reads given image, and computes cv2.houghcircles radius distribution for it
 
@@ -39,8 +38,9 @@ def get_train_radiuses(cur_im):
         np.array: - array of shape (29, ) - count of each radius
     """
     im = full_pipeline(read_im(cur_im))
-    
-    cv2.imwrite("temp.jpg", im) # необходимо для полного воспроизведения решения
+
+    # необходимо для полного воспроизведения решения
+    cv2.imwrite("temp.jpg", im)  
     im = cv2.imread("temp.jpg")
 
     proc = cv2.resize(im, (AVG_W, AVG_H))
@@ -52,23 +52,27 @@ def get_train_radiuses(cur_im):
     return distros
 
 
-def get_radiuses(data_df):
+def get_radiuses(data_df: pd.DataFrame) -> list:
     """
     Reads preprocessed images and retreives HoughCircles radiuses
     for each image
+    Args:
+        data_df:pd.DataFrame
+    Returns:
+        rows:list - list with radiuses for each image
     """
     rows = []
     for ind, (frac, im) in enumerate(
         list(zip(data_df.fraction.to_list(), data_df.ImageId.to_list()))
     ):
-        print("processed ",ind+1)
+        print("processed ", ind + 1)
         distros = get_train_radiuses(im)
         if frac is not np.nan:
             rows.append([im, frac] + distros)
     return rows
 
 
-def y_radius(y):
+def y_radius(y: np.array) -> (int, np.array):
     """
     Return mean bin diameter for matrix of distributions of beans
 
@@ -93,7 +97,7 @@ def y_radius(y):
     return np.inner(mean_y, sive_diam_pan), mean_y
 
 
-def x_radius(x):
+def x_radius(x: np.array) -> (int, np.array):
     """
     Return mean radius for matrix of distributions of radiuses
 
@@ -122,7 +126,9 @@ def x_radius(x):
     return np.inner(mean_x, list(range(1, 30))), mean_x
 
 
-def augment_data(data_x, data_y, shifts):
+def augment_data(
+    data_x: np.array, data_y: np.array, shifts: int
+) -> (np.array, np.array):
     """
     Helper method to overcome unknown fractions and new distributions of radiuses and bins.
 
@@ -154,9 +160,22 @@ def augment_data(data_x, data_y, shifts):
     return augmented_x, best_y
 
 
-def augment_class(class_name, labels_df, radius_df, augment=True):
+def augment_class(
+    class_name: str,
+    labels_df: pd.DataFrame,
+    radius_df: pd.DataFrame,
+    augment: bool = True,
+) -> (np.array, np.array):
     """
     Method find all rows for the given class (fraction) and augments them
+    Args:
+        class_name:str - which fraction to augment
+        labels_df:pd.DataFrame
+        radius_df:pd.DataFrame
+        augment:bool
+    Returns:
+        train_x:np.array
+        train_y:np.array
     """
     train_class = radius_df[radius_df.fraction == class_name]
     init_x, init_y = get_data_labels(train_class, labels_df)
@@ -170,7 +189,9 @@ def augment_class(class_name, labels_df, radius_df, augment=True):
     return train_x, train_y
 
 
-def get_data_labels(radius_df, labels_df, normalize=True):
+def get_data_labels(
+    radius_df: pd.DataFrame, labels_df: pd.DataFrame, normalize: bool = True
+) -> (pd.DataFrame, pd.DataFrame):
     """
     Drop redundant columns and normalize target distributions by their sum
 
@@ -196,10 +217,13 @@ def get_data_labels(radius_df, labels_df, normalize=True):
     return data, labels
 
 
-def read_data():
+def read_data() -> (pd.DataFrame, pd.DataFrame):
     """
     Reads preprocessed images and retreives HoughCircles radiuses
     for each image, shuffles everything and assembles new pandas dataframe from the array of radiuses
+    Returns:
+        data_df:pd.DataFrame
+        radius_df:pd.DataFrame
     """
     data_df = pd.read_csv(LABELS_PATH)
     rows = get_radiuses(data_df)
@@ -221,9 +245,19 @@ def read_data():
     return data_df, radius_df
 
 
-def train_test_split(x_df, y_df):
+def train_test_split(
+    x_df: pd.DataFrame, y_df: pd.DataFrame
+) -> (pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame):
     """
     Train test split of the radiuses (x_df) and target bin distributions (y_df)
+    Args:
+        x_df:pd.DataFrame
+        y_df:pd.DataFrame
+    Returns:
+        train_df: pd.DataFrame
+        train_labels_df: pd.DataFrame
+        test_df: pd.DataFrame
+        test_labels_df: pd.DataFrame
     """
     mask = np.random.rand(len(x_df)) < 0.8
     train_df = x_df[mask]
@@ -233,9 +267,20 @@ def train_test_split(x_df, y_df):
     return train_df, train_labels_df, test_df, test_labels_df
 
 
-def get_training_data(labels_df, train_df, test_df):
+def get_training_data(
+    labels_df: pd.DataFrame, train_df: pd.DataFrame, test_df: pd.DataFrame
+) -> (np.array, np.array, np.array, np.array):
     """
     Function augments samples of each fraction except 2040pdcd and returns train and test data
+    Args:
+        labels_df:pd.DataFrame
+        train_df:pd.DataFrame
+        test_df:pd.DataFrame
+    Returns:
+        train_x:np.array
+        train_y:np.array
+        test_x:np.array
+        test_y:np.array
     """
     train_1620, labels_1620 = augment_class(
         "16/20", augment=True, labels_df=labels_df, radius_df=train_df
@@ -266,28 +311,35 @@ def get_training_data(labels_df, train_df, test_df):
     return train_x, train_y, test_x, test_y
 
 
-def train_model(train_x, train_y):
+def train_model(train_x: np.array, train_y: np.array) -> MultiOutputRegressor:
     """
     Function trains RandomForestRegressor on train x and train y
+    Args:
+        train_x:np.array - training data
+        train_y:np.array - training labels
+    Returns:
+        regr: MultiOutputRegressor - trained model
     """
     regr = MultiOutputRegressor(RandomForestRegressor(n_estimators=40, random_state=6))
     regr = regr.fit(train_x, train_y)
     return regr
 
 
-def get_trained_model():
+def get_trained_model() -> MultiOutputRegressor:
     """
     Function runs all the pipeline and returns the trained model
+    Returns:
+        regr:MultiOutputRegressor - model
     """
     global data_df
 
     random.seed(41)
     np.random.seed(41)
 
-    print('Preprocessing images')
+    print("Preprocessing images")
     data_df, radius_df = read_data()
 
-    print('Training model.....')
+    print("Training model.....")
     train_df, train_labels_df, test_df, test_labels_df = train_test_split(
         radius_df, data_df
     )
