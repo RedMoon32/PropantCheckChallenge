@@ -73,7 +73,7 @@ def get_granule_count(processed_img:np.array) -> (int, np.array):
     )
     
     resized = cv2.resize(proc, (AVG_W, AVG_H))
-    avg_r, circles = draw_hough(resized, ret_circles=True)
+    avg_r, circles = draw_hough(resized)
     found = count_circles(proc, avg_r)
     radiuses = np.array([circle[2] for circle in circles])
 
