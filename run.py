@@ -1,10 +1,8 @@
 import os
 import tqdm
 import joblib
-
 import train_distributions
 
-TRAIN = "./data/train"
 MODELS_PATH = "models"
 
 def run():
