@@ -2,7 +2,7 @@ import numpy as np
 import cv2
 
 
-def apply_filter(image) -> np.array:
+def apply_filter(image:np.array) -> np.array:
     """
     Define a 5X5 kernel and apply the filter to gray scale image
     Args:
@@ -16,7 +16,7 @@ def apply_filter(image) -> np.array:
     return filtered
 
 
-def apply_threshold(filtered) -> np.array:
+def apply_threshold(filtered:np.array) -> np.array:
     """
     Apply OTSU threshold
     Args:
@@ -30,8 +30,8 @@ def apply_threshold(filtered) -> np.array:
 
 
 def cut_image(
-    img,
-    padding
+    img:np.array,
+    padding:int
 ) -> np.array:
     """
     Center crop of image with given boundaries
@@ -47,7 +47,7 @@ def cut_image(
     ]
 
 
-def cut_borders(img) -> np.array:
+def cut_borders(img:np.array) -> np.array:
     """
     Automaticly crop black rectangle in the photo
     Args:
@@ -82,7 +82,7 @@ def cut_borders(img) -> np.array:
     return img[x_left:x_right, y_left:y_right]
 
 
-def detect_contour(img, image_shape) -> (np.array, list):
+def detect_contour(img:np.array, image_shape:tuple) -> (np.array, list):
     """
     Detect image contours and draw them on empty image with given shape
     Returns new image and list of contours
@@ -103,7 +103,7 @@ def detect_contour(img, image_shape) -> (np.array, list):
     return canvas, cnt
 
 
-def detect_corners_from_contour(canvas, cnt) -> list:
+def detect_corners_from_contour(canvas:np.array, cnt:np.array) -> list:
     """
     Detecting corner points from contours using cv2.approxPolyDP()
     Args:
@@ -120,7 +120,7 @@ def detect_corners_from_contour(canvas, cnt) -> list:
     return approx_corners
 
 
-def order_points(pts) -> list:
+def order_points(pts:list) -> list:
     """
     Rearrange the corner points so that first entry is top-left,
     second is top-right, third is bottom-right, fourth is bottom-left.
@@ -145,7 +145,7 @@ def order_points(pts) -> list:
     return rect
 
 
-def four_point_transform(image, pts) -> np.array:
+def four_point_transform(image:np.array, pts:list) -> np.array:
     """
     Apply perspective transform to image
     Args:
@@ -189,7 +189,7 @@ def four_point_transform(image, pts) -> np.array:
     return warped
 
 
-def automatic_brightness_and_contrast(image, clip_hist_percent=1) -> (np.array, float, float):
+def automatic_brightness_and_contrast(image:np.array, clip_hist_percent:float = 1) -> (np.array, float, float):
     """
     Brightness and contrast normalization of the image
     by clipping grays in histogram
@@ -236,7 +236,7 @@ def automatic_brightness_and_contrast(image, clip_hist_percent=1) -> (np.array, 
     return (auto_result, alpha, beta)
 
 
-def full_pipeline(img) -> np.array:
+def full_pipeline(img:np.array) -> np.array:
     """
     Full preprocssing of the image
     Args:

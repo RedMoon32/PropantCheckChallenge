@@ -5,7 +5,7 @@ from preprocess import cut_image
 AVG_H = 1381
 AVG_W = 2272
 
-def get_mask(source) -> np.array:
+def get_mask(source:np.array) -> np.array:
     """
     Convert to gray, apply median blur and binary threshold
     Args:
@@ -19,7 +19,7 @@ def get_mask(source) -> np.array:
                            blured, 127, 255, cv2.THRESH_BINARY)[1])
     return tresholded
 
-def count_circles(source, avg_circle_radius) -> int:
+def count_circles(source:np.array, avg_circle_radius:float) -> int:
     """
     Counts circles by dividing number of black pixels to average circle area.
     Args:
@@ -34,7 +34,7 @@ def count_circles(source, avg_circle_radius) -> int:
     return circle_count
 
 
-def draw_hough(draw_source) -> (float, np.array):
+def draw_hough(draw_source:np.array) -> (float, np.array):
     """
     Looks for circles in image, draws them and returns average radius
     and list of centers and radiuses of each circle
@@ -62,7 +62,7 @@ def draw_hough(draw_source) -> (float, np.array):
     return avg_r, circles[0]
 
 
-def get_granule_count(processed_img) -> (int, np.array):
+def get_granule_count(processed_img:np.array) -> (int, np.array):
     """
     Returns approximate count of circles in image,
     if ret_dist == True, return distribution of circles' radiuses
