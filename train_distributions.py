@@ -12,6 +12,7 @@ from RPCC_metric_utils_for_participants_V2 import *
 
 LABELS_PATH = "./data/labels/train.csv"
 TRAIN = "./data/train"
+PREPROCESSED_PATH = "preprocessed_imgs"
 PIXEL_TO_MM_RATIO = 0.1
 data_df = None
 
@@ -25,7 +26,7 @@ def read_im(im_id: int) -> np.array:
     Returns:
         np.array: - image read
     """
-    return cv2.imread(os.path.join(TRAIN, str(im_id) + ".jpg"))
+    return cv2.imread(os.path.join(PREPROCESSED_PATH, str(im_id) + ".jpg"))
 
 
 def get_train_radiuses(cur_im: int) -> np.array:
@@ -37,11 +38,7 @@ def get_train_radiuses(cur_im: int) -> np.array:
     Returns:
         np.array: - array of shape (29, ) - count of each radius
     """
-    im = full_pipeline(read_im(cur_im))
-
-    # необходимо для полного воспроизведения решения
-    cv2.imwrite("temp.jpg", im)  
-    im = cv2.imread("temp.jpg")
+    im = read_im(cur_im)
 
     proc = cv2.resize(im, (AVG_W, AVG_H))
     avg_r, circles = draw_hough(proc)
@@ -65,7 +62,6 @@ def get_radiuses(data_df: pd.DataFrame) -> list:
     for ind, (frac, im) in enumerate(
         list(zip(data_df.fraction.to_list(), data_df.ImageId.to_list()))
     ):
-        print("processed ", ind + 1)
         distros = get_train_radiuses(im)
         if frac is not np.nan:
             rows.append([im, frac] + distros)
@@ -336,7 +332,6 @@ def get_trained_model() -> MultiOutputRegressor:
     random.seed(41)
     np.random.seed(41)
 
-    print("Preprocessing images")
     data_df, radius_df = read_data()
 
     print("Training model.....")
