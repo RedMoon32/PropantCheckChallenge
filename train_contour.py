@@ -8,7 +8,7 @@ from sklearn.multioutput import MultiOutputRegressor
 from sklearn.ensemble import AdaBoostRegressor
 import joblib
 
-
+HAND_MARKED_LABELS = "./data/labels/labels_hand_marked.csv"
 def get_stats(im: np.array) -> (np.array, np.array):
     """
     Returns stats and areas of connected components of the image
@@ -168,7 +168,7 @@ def get_model() -> AdaBoostRegressor:
     # Special dataframe of our handmarked labels
     drop_columns = ["Unnamed: 0", "Unnamed: 0.1", "Unnamed: 0.1.1"]
     drop_images = [104, 908, 906, 907, 905, 904] + list(range(905, 1000))
-    df_augmented = read_data_frame("labels_hand_marked.csv", drop_columns, drop_images)
+    df_augmented = read_data_frame(HAND_MARKED_LABELS, drop_columns, drop_images)
     # precompute stats and brute force (l,r) boundaries
     images_aug_, labels_aug_, imageids_aug_ = precompute_stats(df_augmented)
     imageids_aug_ = df_augmented.ImageId.to_numpy()
@@ -188,7 +188,7 @@ def get_model() -> AdaBoostRegressor:
     x_train_aug = deleted_test_x[:]
     y_train_aug = deleted_test_y[:]
     # train
-    clf = MultiOutputRegressor(AdaBoostRegressor(random_state=197, n_estimators=5)).fit(
+    clf = MultiOutputRegressor(AdaBoostRegressor(random_state=10, n_estimators=5)).fit(
         x_train_aug, y_train_aug
     )
     return clf
