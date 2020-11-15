@@ -1,6 +1,23 @@
 import numpy as np
 import cv2
+import os
 
+PREPROCESSED_PATH = "preprocessed_imgs"
+IM_PATH = "./data/train"
+
+def read_im(index:int, preprocessed = True) -> np.array:
+    """
+    Read image with given index
+    Args:
+        index:int
+    Returns:
+        np.array - image read
+    """
+    base_path = IM_PATH
+    if preprocessed:
+        base_path = PREPROCESSED_PATH 
+    
+    return cv2.imread(os.path.join(base_path, str(int(index))+'.jpg'))
 
 def apply_filter(image:np.array) -> np.array:
     """
