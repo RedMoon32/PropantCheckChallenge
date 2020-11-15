@@ -3,6 +3,7 @@ import numpy as np
 import cv2
 import os
 import random
+import preprocess
 from sklearn.multioutput import MultiOutputRegressor
 from sklearn.ensemble import RandomForestRegressor
 
@@ -11,22 +12,9 @@ from hough import draw_hough, AVG_H, AVG_W
 from RPCC_metric_utils_for_participants_V2 import *
 
 LABELS_PATH = "./data/labels/train.csv"
-TRAIN = "./data/train"
-PREPROCESSED_PATH = "preprocessed_imgs"
 PIXEL_TO_MM_RATIO = 0.1
 data_df = None
 
-
-def read_im(im_id: int) -> np.array:
-    """
-    Read image by id
-
-    Args:
-        im_id: int - image id
-    Returns:
-        np.array: - image read
-    """
-    return cv2.imread(os.path.join(PREPROCESSED_PATH, str(im_id) + ".jpg"))
 
 
 def get_train_radiuses(cur_im: int) -> np.array:
@@ -38,7 +26,7 @@ def get_train_radiuses(cur_im: int) -> np.array:
     Returns:
         np.array: - array of shape (29, ) - count of each radius
     """
-    im = read_im(cur_im)
+    im = preprocess.read_im(cur_im)
 
     proc = cv2.resize(im, (AVG_W, AVG_H))
     avg_r, circles = draw_hough(proc)

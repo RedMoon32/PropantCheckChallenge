@@ -10,18 +10,6 @@ import joblib
 
 
 
-PREPROCESSED_PATH = 'preprocessed_imgs'
-
-def read_im(index:int) -> np.array:
-    """
-    Read image with given index
-    Args:
-        index:int
-    Returns:
-        np.array - image read
-    """
-    return cv2.imread(os.path.join(PREPROCESSED_PATH, str(int(index))+'.jpg'))
-
 def get_stats(im:np.array)->(np.array, np.array):
     """
     Returns stats and areas of connected components of the image
@@ -39,7 +27,7 @@ def get_stats(im:np.array)->(np.array, np.array):
     label_area = stats[1:, cv2.CC_STAT_AREA]
     return stats, label_area
 
-def get_count(im:np.array, l:int = 70, r:int = 600, res:bool=True, ret_stats:bool=False):
+def get_count(im:np.array, l:int = 70, r:int = 600, res:bool=True):
     """
     Returns approximate number of granules, by counting mean area of component 
     that lies in [l, r]
@@ -52,6 +40,7 @@ def get_count(im:np.array, l:int = 70, r:int = 600, res:bool=True, ret_stats:boo
         res:bool
         ret_stats: bool - do we want to return stats
     """
+    stats = None
     if res:
         stats, label_area = get_stats(im)
     else:
@@ -60,9 +49,7 @@ def get_count(im:np.array, l:int = 70, r:int = 600, res:bool=True, ret_stats:boo
     singular_mask = (min_area < label_area) & (label_area <= max_area)
     circle_area = np.mean(label_area[singular_mask])
     found = int(np.sum(np.round(label_area / circle_area)))
-    if ret_stats:
-        return found, stats
-    return found
+    return found, stats
 
 def precompute_stats(df:pd.DataFrame) -> (np.array, np.array, np.array):
     """
@@ -81,7 +68,7 @@ def precompute_stats(df:pd.DataFrame) -> (np.array, np.array, np.array):
     imageids = df.ImageId.to_list()
     stats = []
     for im in df.ImageId.to_list():
-        curim = read_im(im)
+        curim = preprocess.read_im(im)
         stat, labarea = get_stats(curim)
         stats.append(stat.copy())
         images.append(labarea)
@@ -113,7 +100,7 @@ def brute_force_bounds(images:np.array, labels:np.array, imageids:np.array) -> (
         
         for r in range(l+10, 1000, 10):
             try:
-                found = get_count(im,l=l, r=r, res=False)
+                found, _ = get_count(im,l=l, r=r, res=False)
             except ValueError:
                 found = 0
             true = lab
@@ -128,7 +115,7 @@ def brute_force_bounds(images:np.array, labels:np.array, imageids:np.array) -> (
         bests[id_] = min_error
         train_y.append((l, best_r))
         
-        found, stats = get_count(read_im(imid), l=0, r=1000, res=True, ret_stats=True)
+        found, stats = get_count(preprocess.read_im(imid), l=0, r=1000, res=True, ret_stats=True)
 
         #find distribution
         p = pd.DataFrame(stats, columns=['CC_STAT_LEFT', 'CC_STAT_TOP', 'CC_STAT_WIDTH', 'CC_STAT_HEIGHT', 'CC_STAT_AREA'])
