@@ -11,7 +11,7 @@ MODELS_PATH = "models"
 
 
 def run():
-    print('Preprocessing train images...')
+    print("Preprocessing train images...")
     try:
         os.mkdir(preprocess.PREPROCESSED_PATH)
     except:
@@ -25,13 +25,14 @@ def run():
         except Exception as e:
             print(e)
             import sys
+
             sys.exit(-1)
 
     try:
         os.mkdir(MODELS_PATH)
     except:
         pass
-    
+
     dist_model = train_distributions.get_trained_model()
     path = os.path.join(MODELS_PATH, "model.pkl")
     joblib.dump(dist_model, path)
@@ -41,6 +42,7 @@ def run():
     path = os.path.join(MODELS_PATH, "counter_model.pkl")
     joblib.dump(counter_model, path)
     print("Model saved at ", path)
+
 
 if __name__ == "__main__":
     warnings.filterwarnings("ignore")
