@@ -115,7 +115,7 @@ def brute_force_bounds(images:np.array, labels:np.array, imageids:np.array) -> (
         bests[id_] = min_error
         train_y.append((l, best_r))
         
-        found, stats = get_count(preprocess.read_im(imid), l=0, r=1000, res=True, ret_stats=True)
+        found, stats = get_count(preprocess.read_im(imid), l=0, r=1000, res=True)
 
         #find distribution
         p = pd.DataFrame(stats, columns=['CC_STAT_LEFT', 'CC_STAT_TOP', 'CC_STAT_WIDTH', 'CC_STAT_HEIGHT', 'CC_STAT_AREA'])
@@ -143,10 +143,10 @@ def get_model()->AdaBoostRegressor:
         clf:AdaBoostRegressor
     """
     #Read dataframes and drop excess columns and bad images
-    df_original = read_data_frame('RPCC_labels.csv', [], [104])
     #Special dataframe of our handmarked labels
-    df_augmented = read_data_frame('only_augmented.csv', ['Unnamed: 0'], [])
-    df_augmented = pd.concat([df_original, df_augmented])
+    drop_columns = ['Unnamed: 0', 'Unnamed: 0.1', 'Unnamed: 0.1.1']
+    drop_images = [104, 908, 906, 907, 905, 904]+list(range(905, 1000))
+    df_augmented = read_data_frame('labels_hand_marked.csv', drop_columns, drop_images)
     #precompute stats and brute force (l,r) boundaries
     images_aug_, labels_aug_, imageids_aug_ = precompute_stats(df_augmented)
     imageids_aug_ = df_augmented.ImageId.to_numpy()
@@ -161,7 +161,7 @@ def get_model()->AdaBoostRegressor:
     x_train_aug = deleted_test_x[:]
     y_train_aug = deleted_test_y[:]
     #train
-    clf = MultiOutputRegressor(AdaBoostRegressor(random_state=10, n_estimators=5)).fit(x_train_aug, y_train_aug)
+    clf = MultiOutputRegressor(AdaBoostRegressor(random_state=197, n_estimators=5)).fit(x_train_aug, y_train_aug)
     return clf
 
 if __name__ == '__main__':
