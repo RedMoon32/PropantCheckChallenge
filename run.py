@@ -34,13 +34,8 @@ def run():
         pass
 
     dist_model = train_distributions.get_trained_model()
-    path = os.path.join(MODELS_PATH, "model.pkl")
+    path = os.path.join(MODELS_PATH, "regr_tree.model")
     joblib.dump(dist_model, path)
-    print("Model saved at ", path)
-    print("Training counter model...")
-    counter_model = train_contour.get_model()
-    path = os.path.join(MODELS_PATH, "counter_model.pkl")
-    joblib.dump(counter_model, path)
     print("Model saved at ", path)
 
 

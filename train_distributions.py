@@ -5,7 +5,7 @@ import os
 import random
 import preprocess
 from sklearn.multioutput import MultiOutputRegressor
-from sklearn.ensemble import RandomForestRegressor
+from sklearn.tree import DecisionTreeRegressor
 
 from preprocess import full_pipeline
 from hough import draw_hough, AVG_H, AVG_W
@@ -27,7 +27,6 @@ def get_train_radiuses(cur_im: int) -> np.array:
         np.array: - array of shape (29, ) - count of each radius
     """
     im = preprocess.read_im(cur_im)
-
     proc = cv2.resize(im, (AVG_W, AVG_H))
     avg_r, circles = draw_hough(proc)
     radiuses = circles[:, 2]
@@ -304,12 +303,12 @@ def train_model(train_x: np.array, train_y: np.array) -> MultiOutputRegressor:
     Returns:
         regr: MultiOutputRegressor - trained model
     """
-    regr = MultiOutputRegressor(RandomForestRegressor(n_estimators=40, random_state=6))
+    regr = DecisionTreeRegressor(max_depth=8, random_state=10)
     regr = regr.fit(train_x, train_y)
     return regr
 
 
-def get_trained_model() -> MultiOutputRegressor:
+def get_trained_model() -> DecisionTreeRegressor:
     """
     Function runs all the pipeline and returns the trained model
     Returns:

@@ -274,3 +274,4 @@ def full_pipeline(img:np.array) -> np.array:
     res = automatic_brightness_and_contrast(cutted, clip_hist_percent=1)[0]
     img = np.rot90(res) if img.shape[0] > img.shape[1] else res
     return img
+    
