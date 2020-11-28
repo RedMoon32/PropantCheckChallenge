@@ -14,6 +14,7 @@ def run():
     print("Preprocessing train images...")
     try:
         os.mkdir(preprocess.PREPROCESSED_PATH)
+        os.mkdir(MODELS_PATH)
     except:
         pass
 
@@ -27,11 +28,6 @@ def run():
             import sys
 
             sys.exit(-1)
-
-    try:
-        os.mkdir(MODELS_PATH)
-    except:
-        pass
 
     dist_model = train_distributions.get_trained_model()
     path = os.path.join(MODELS_PATH, "regr_tree.model")
