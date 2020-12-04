@@ -25,6 +25,11 @@ Ne_Beite
 
 Презентация решения: https://docs.google.com/presentation/d/1wQ5OYPsjdsp4QQN5kUn7LCuuPR50J25oFWSBCFwrIgE/edit?usp=sharing
 
+## Описание файлов  
+- preprocess.py - предобработка фотографий (вырезка прямоугольников, настройка перспективы и яркости)   
+- hough.py - методы для подсчета гранул и распределения радиусов  
+- train_distributions.py - обучение распределений радиусов в размеры гранул  
+
 ## Запуск обучения <a name="training"></a>
 1. Для установки виртуального окружения и зависимостей:\
 ```$ python -m venv env```  
