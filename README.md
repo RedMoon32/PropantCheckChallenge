@@ -1,5 +1,5 @@
 # Propant Check Challenge Solution
-Данный репозиторий является решением для сорвенования RosneftPropantCheckChallenge (https://boosters.pro/championship/RPCC/overview). 
+Данный репозиторий является решением для сорвенования RosneftPropantCheckChallenge (https://boosters.pro/championship/RPCC/overview) Команды Ne_Beite (7 место из 160 команд). 
 Условие задачи: по фотографиям рассыпанных на листке гранул пропанта классифицировать их фракцию и количество.
 ## Содержание
 1. [Описание решения](#overview)
